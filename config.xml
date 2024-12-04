@@ -1,0 +1,9 @@
+<config>
+    <graphviz_path>/usr/local/bin/dot</graphviz_path>
+    <package_name>socket</package_name>
+    <max_depth>2</max_depth>
+    <output>
+        <file_name>dependency_graph</file_name>
+        <format>jpg</format>
+    </output>
+</config>
