@@ -17,7 +17,7 @@
 1. Скачайте или клонируйте репозиторий:
 
    ```bash
-   git clone https://github.com/yourusername/dependency-visualizer.git
+   git clone hhttps://github.com/Juonior/npm-to-graph.git
    ```
 
 2. Установите необходимые зависимости:
