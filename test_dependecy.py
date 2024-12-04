@@ -1,8 +1,6 @@
 from visualize_dependencies import load_config, get_dependencies, create_dependency_graph, visualize_graph
 import unittest
 from unittest.mock import patch, MagicMock
-import os
-import requests
 from graphviz import Digraph
 import networkx as nx
 
