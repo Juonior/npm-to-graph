@@ -13,7 +13,7 @@ def load_config(config_file):
     config = {
         "graphviz_path": root.find("graphviz_path").text,
         "package_name": root.find("package_name").text,
-        "max_depth": int(root.find("max_depth").text)-1,
+        "max_depth": int(root.find("max_depth").text) - 1,
         "output": {
             "file_name": root.find("output/file_name").text,
             "format": root.find("output/format").text
@@ -65,9 +65,51 @@ def visualize_graph(graph, output_config):
         print("No nodes in the graph to visualize!")
         return
 
+    # Определение уровней
+    levels = {}
+    for node in graph.nodes:
+        levels[node] = set()
+
+    # Поиск уровней для каждого узла
+    def assign_levels(current_node, current_level, visited):
+        if current_level > 3:  # Ограничиваем уровни до 3
+            return
+        if current_node in visited and current_level in levels[current_node]:
+            return  # Узел уже обработан на этом уровне
+
+        levels[current_node].add(current_level)
+        visited.add(current_node)
+        for neighbor in graph.successors(current_node):  # Следующие узлы по направлению графа
+            assign_levels(neighbor, current_level + 1, visited)
+
+    # Запуск определения уровней
+    visited_nodes = set()
+    for root_node in graph.nodes:
+        if not any(root_node == edge[1] for edge in graph.edges):  # Если это корневой узел
+            assign_levels(root_node, 1, visited_nodes)
+
+    # Определение цветов
+    color_map = {
+        1: "yellow",
+        2: "red",
+        3: "blue",
+        "multiple": "purple",
+        "default": "white"  # Цвет по умолчанию для узлов без уровней
+    }
+    node_colors = {}
+    for node, node_levels in levels.items():
+        if not node_levels:  # Если узел не имеет уровней
+            node_colors[node] = color_map["default"]
+        elif len(node_levels) > 1:  # Если узел на нескольких уровнях
+            node_colors[node] = color_map["multiple"]
+        else:
+            level = next(iter(node_levels))  # Берем единственный уровень
+            node_colors[node] = color_map[level]
+
+    # Создание Graphviz объекта
     dot = Digraph(format=output_config['format'], engine='dot')
     for node in graph.nodes:
-        dot.node(node)
+        dot.node(node, style="filled", fillcolor=node_colors.get(node, "white"))
     for edge in graph.edges:
         dot.edge(edge[0], edge[1])
 
@@ -77,10 +119,10 @@ def visualize_graph(graph, output_config):
         dot_file.write(dot.source)
     print(f"Graphviz code saved to {dot_file_path}")
     
-    # Генерация PNG и сохранение в файл
-    output_path = os.path.join(os.getcwd(), f"{output_config['file_name']}")
-    dot.render(output_path, cleanup=True)
-    print(f"Graph visualized and saved as {output_path}")
+    dot.render(dot_file_path, cleanup=True)
+
+    # Открытие файла (по желанию)
+    dot.view(dot_file_path)
 
 # Основной скрипт
 def main(config_file):
